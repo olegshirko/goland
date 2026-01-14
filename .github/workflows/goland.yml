@@ -1,0 +1,47 @@
+name: GoLand DMG Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-release:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download GoLand
+        run: |
+          mkdir -p work
+          curl -L \
+            -o work/goland.dmg \
+            https://download.jetbrains.com/go/goland-2025.3.1-aarch64.dmg
+
+      - name: Split into 50MB parts
+        run: |
+          mkdir -p work/parts
+          split -b 50m work/goland.dmg work/parts/goland.dmg.part.
+
+      - name: Join parts back
+        run: |
+          cat work/parts/goland.dmg.part.* > work/goland-2025.3.1-aarch64.dmg
+
+      - name: Calculate SHA256
+        run: |
+          shasum -a 256 work/goland-2025.3.1-aarch64.dmg > work/SHA256.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: goland-2025.3.1
+          name: GoLand 2025.3.1 (Apple Silicon)
+          body: |
+            GoLand 2025.3.1 for macOS (Apple Silicon)
+
+            SHA256 checksum is attached.
+          files: |
+            work/goland-2025.3.1-aarch64.dmg
+            work/SHA256.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
