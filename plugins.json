@@ -1,0 +1,206 @@
+[
+    {
+        "code": "II",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": false
+    },
+    {
+        "code": "AC",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": false
+    },
+    {
+        "code": "DPN",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "RSC",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "PS",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": false
+    },
+    {
+        "code": "RSF",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "GO",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": false
+    },
+    {
+        "code": "DM",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "CL",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": false
+    },
+    {
+        "code": "RS0",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "RC",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "RD",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": false
+    },
+    {
+        "code": "PC",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": false
+    },
+    {
+        "code": "RSV",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "RSU",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": false
+    },
+    {
+        "code": "RM",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": false
+    },
+    {
+        "code": "WS",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": false
+    },
+    {
+        "code": "DB",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": false
+    },
+    {
+        "code": "DC",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "PDB",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "PWS",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "PGO",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "PPS",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "PPC",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "PRB",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "PSW",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "PSI",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "PCWMP",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "DP",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "RS",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "QA",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": false
+    },
+    {
+        "code": "DS",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "RR",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    },
+    {
+        "code": "AIP",
+        "paidUpTo": "2026-09-21",
+        "fallbackDate": "2026-09-21",
+        "extended": true
+    }
+]
