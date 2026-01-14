@@ -3,6 +3,9 @@ name: GoLand DMG Release
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-release:
     runs-on: macos-latest
