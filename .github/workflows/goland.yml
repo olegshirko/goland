@@ -24,7 +24,21 @@ jobs:
             > meta.json
 
           VERSION=$(jq -r '.GO[0].version' meta.json)
-          URL=$(jq -r '.GO[0].downloads.macArm64.link' meta.json)
+          URL=$(jq -r '
+            .GO[0].downloads.mac[]
+            | select(.arch=="arm64")
+            | .link
+          ' meta.json)
+
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "Failed to detect version"
+            exit 1
+          fi
+
+          if [ -z "$URL" ] || [ "$URL" = "null" ]; then
+            echo "Failed to detect download URL"
+            exit 1
+          fi
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "url=$URL" >> $GITHUB_OUTPUT
