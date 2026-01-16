@@ -24,13 +24,7 @@ jobs:
             > meta.json
 
           VERSION=$(jq -r '.GO[0].version' meta.json)
-
-          URL=$(jq -r '
-            .GO[0].downloads.mac[]
-            | if type=="string" then .
-              else .link end
-            | select(test("arm64|aarch64"))
-          ' meta.json | head -n 1)
+          URL=$(jq -r '.GO[0].downloads.macM1.link' meta.json)
 
           if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
             echo "Failed to detect version"
@@ -38,7 +32,7 @@ jobs:
           fi
 
           if [ -z "$URL" ] || [ "$URL" = "null" ]; then
-            echo "Failed to detect download URL"
+            echo "Failed to detect macOS Apple Silicon download URL"
             cat meta.json
             exit 1
           fi
