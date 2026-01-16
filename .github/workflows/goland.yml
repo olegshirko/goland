@@ -1,50 +1,76 @@
-name: GoLand DMG Release
+name: Auto GoLand Release
 
 on:
+  schedule:
+    - cron: "0 3 * * *"   # раз в сутки (03:00 UTC)
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build-release:
-    runs-on: macos-latest
+  check-and-release:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Download GoLand
+      - name: Fetch latest GoLand version metadata
+        id: meta
+        run: |
+          curl -s \
+            "https://data.services.jetbrains.com/products/releases?code=GO&latest=true&type=release" \
+            > meta.json
+
+          VERSION=$(jq -r '.GO[0].version' meta.json)
+          URL=$(jq -r '.GO[0].downloads.macArm64.link' meta.json)
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Check if release already exists
+        id: check
+        run: |
+          TAG="goland-${{ steps.meta.outputs.version }}"
+
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Stop if release already exists
+        if: steps.check.outputs.exists == 'true'
+        run: |
+          echo "Release already exists, skipping."
+
+      - name: Download GoLand DMG
+        if: steps.check.outputs.exists == 'false'
         run: |
           mkdir -p work
           curl -L \
-            -o work/goland.dmg \
-            https://download.jetbrains.com/go/goland-2025.3.1-aarch64.dmg
-
-      - name: Split into 50MB parts
-        run: |
-          mkdir -p work/parts
-          split -b 50m work/goland.dmg work/parts/goland.dmg.part.
-
-      - name: Join parts back
-        run: |
-          cat work/parts/goland.dmg.part.* > work/goland-2025.3.1-aarch64.dmg
+            -o work/goland-${{ steps.meta.outputs.version }}-aarch64.dmg \
+            "${{ steps.meta.outputs.url }}"
 
       - name: Calculate SHA256
+        if: steps.check.outputs.exists == 'false'
         run: |
-          shasum -a 256 work/goland-2025.3.1-aarch64.dmg > work/SHA256.txt
+          shasum -a 256 \
+            work/goland-${{ steps.meta.outputs.version }}-aarch64.dmg \
+            > work/SHA256.txt
 
       - name: Create GitHub Release
+        if: steps.check.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: goland-2025.3.1
-          name: GoLand 2025.3.1 (Apple Silicon)
+          tag_name: goland-${{ steps.meta.outputs.version }}
+          name: GoLand ${{ steps.meta.outputs.version }} (Apple Silicon)
           body: |
-            GoLand 2025.3.1 for macOS (Apple Silicon)
+            Automated release of GoLand ${{ steps.meta.outputs.version }}
 
-            SHA256 checksum is attached.
+            Platform: macOS (Apple Silicon)
+            SHA256 checksum attached.
           files: |
-            work/goland-2025.3.1-aarch64.dmg
+            work/goland-${{ steps.meta.outputs.version }}-aarch64.dmg
             work/SHA256.txt
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
