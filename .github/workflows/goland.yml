@@ -85,3 +85,60 @@ jobs:
           files: |
             work/goland-${{ steps.meta.outputs.version }}-aarch64.dmg
             work/SHA256.txt
+
+  release-pycharm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch latest PyCharm version metadata
+        id: meta
+        run: |
+          curl -s \
+            "https://data.services.jetbrains.com/products/releases?code=PC&latest=true&type=release" \
+            > meta.json
+          
+          VERSION=$(jq -r '.PC[0].version' meta.json)
+          URL=$(jq -r '.PC[0].downloads.macM1.link' meta.json)
+          
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then exit 1; fi
+          if [ -z "$URL" ] || [ "$URL" = "null" ]; then exit 1; fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Check if release exists
+        id: check
+        run: |
+          TAG="pycharm-${{ steps.meta.outputs.version }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download PyCharm DMG
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          mkdir -p work
+          curl -L \
+            -o work/pycharm-${{ steps.meta.outputs.version }}-aarch64.dmg \
+            "${{ steps.meta.outputs.url }}"
+
+      - name: Calculate SHA256
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          shasum -a 256 \
+            work/pycharm-${{ steps.meta.outputs.version }}-aarch64.dmg \
+            > work/SHA256.txt
+
+      - name: Create GitHub Release
+        if: steps.check.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: pycharm-${{ steps.meta.outputs.version }}
+          name: PyCharm ${{ steps.meta.outputs.version }} (Apple Silicon)
+          files: |
+            work/pycharm-${{ steps.meta.outputs.version }}-aarch64.dmg
+            work/SHA256.txt
