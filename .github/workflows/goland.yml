@@ -100,13 +100,26 @@ jobs:
             > meta.json
           
           VERSION=$(jq -r '.PC[0].version' meta.json)
-          URL=$(jq -r '.PC[0].downloads.macM1.link' meta.json)
+          URL=$(jq -r '
+            .PC[0].downloads.macM1.link //
+            .PC[0].downloads.macAarch64.link //
+            .PC[0].downloads.mac.link
+          ' meta.json)
           
-          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then exit 1; fi
-          if [ -z "$URL" ] || [ "$URL" = "null" ]; then exit 1; fi
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "Failed to detect version"
+            exit 1
+          fi
+          
+          if [ -z "$URL" ] || [ "$URL" = "null" ]; then
+            echo "Failed to detect macOS download URL"
+            cat meta.json
+            exit 1
+          fi
           
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "url=$URL" >> $GITHUB_OUTPUT
+
 
       - name: Check if release exists
         id: check
