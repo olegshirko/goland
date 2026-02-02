@@ -96,14 +96,13 @@ jobs:
         id: meta
         run: |
           curl -s \
-            "https://data.services.jetbrains.com/products/releases?code=PC&latest=true&type=release" \
+            "https://data.services.jetbrains.com/products/releases?code=PCP&latest=true&type=release" \
             > meta.json
           
-          VERSION=$(jq -r '.PC[0].version' meta.json)
+          VERSION=$(jq -r '.PCP[0].version' meta.json)
           URL=$(jq -r '
-            .PC[0].downloads.macM1.link //
-            .PC[0].downloads.macAarch64.link //
-            .PC[0].downloads.mac.link
+            .PCP[0].downloads.macM1.link //
+            .PCP[0].downloads.mac.link
           ' meta.json)
           
           if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
@@ -119,6 +118,7 @@ jobs:
           
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "url=$URL" >> $GITHUB_OUTPUT
+
 
 
       - name: Check if release exists
