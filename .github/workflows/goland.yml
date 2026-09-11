@@ -155,3 +155,71 @@ jobs:
           files: |
             work/pycharm-${{ steps.meta.outputs.version }}-aarch64.dmg
             work/SHA256.txt
+
+  release-clion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch latest CLion version metadata
+        id: meta
+        run: |
+          curl -s \
+            "https://data.services.jetbrains.com/products/releases?code=CL&latest=true&type=release" \
+            > meta.json
+
+          VERSION=$(jq -r '.CL[0].version' meta.json)
+          URL=$(jq -r '
+            .CL[0].downloads.macM1.link //
+            .CL[0].downloads.mac.link
+          ' meta.json)
+
+          test -n "$VERSION" && test "$VERSION" != "null" || {
+            echo "Failed to detect version"; exit 1;
+          }
+          test -n "$URL" && test "$URL" != "null" || {
+            echo "Failed to detect macOS download URL"; cat meta.json; exit 1;
+          }
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Check if release exists
+        id: check
+        run: |
+          TAG="clion-${{ steps.meta.outputs.version }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG"; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download CLion DMG
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          mkdir -p work
+          curl -fL \
+            -o work/clion-${{ steps.meta.outputs.version }}-aarch64.dmg \
+            "${{ steps.meta.outputs.url }}"
+
+      - name: Calculate SHA256
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          shasum -a 256 \
+            work/clion-${{ steps.meta.outputs.version }}-aarch64.dmg \
+            > work/SHA256.txt
+
+      - name: Create GitHub Release
+        if: steps.check.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: clion-${{ steps.meta.outputs.version }}
+          name: CLion ${{ steps.meta.outputs.version }} (Apple Silicon)
+          body: |
+            Automated release of CLion ${{ steps.meta.outputs.version }}
+
+            Platform: macOS (Apple Silicon)
+            SHA256 checksum attached.
+          files: |
+            work/clion-${{ steps.meta.outputs.version }}-aarch64.dmg
+            work/SHA256.txt
