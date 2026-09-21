@@ -24,21 +24,29 @@ jobs:
             > meta.json
 
           VERSION=$(jq -r '.GO[0].version' meta.json)
-          URL=$(jq -r '.GO[0].downloads.macM1.link' meta.json)
+          URL_ARM=$(jq -r '.GO[0].downloads.macM1.link' meta.json)
+          URL_INTEL=$(jq -r '.GO[0].downloads.mac.link' meta.json)
 
           if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
             echo "Failed to detect version"
             exit 1
           fi
 
-          if [ -z "$URL" ] || [ "$URL" = "null" ]; then
+          if [ -z "$URL_ARM" ] || [ "$URL_ARM" = "null" ]; then
             echo "Failed to detect macOS Apple Silicon download URL"
             cat meta.json
             exit 1
           fi
 
+          if [ -z "$URL_INTEL" ] || [ "$URL_INTEL" = "null" ]; then
+            echo "Failed to detect macOS Intel download URL"
+            cat meta.json
+            exit 1
+          fi
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "url_arm=$URL_ARM" >> $GITHUB_OUTPUT
+          echo "url_intel=$URL_INTEL" >> $GITHUB_OUTPUT
 
       - name: Check if release already exists
         id: check
@@ -56,19 +64,21 @@ jobs:
         run: |
           echo "Release already exists, skipping."
 
-      - name: Download GoLand DMG
+      - name: Download GoLand DMGs
         if: steps.check.outputs.exists == 'false'
         run: |
           mkdir -p work
           curl -L \
             -o work/goland-${{ steps.meta.outputs.version }}-aarch64.dmg \
-            "${{ steps.meta.outputs.url }}"
+            "${{ steps.meta.outputs.url_arm }}"
+          curl -L \
+            -o work/goland-${{ steps.meta.outputs.version }}-x64.dmg \
+            "${{ steps.meta.outputs.url_intel }}"
 
       - name: Calculate SHA256
         if: steps.check.outputs.exists == 'false'
         run: |
-          shasum -a 256 \
-            work/goland-${{ steps.meta.outputs.version }}-aarch64.dmg \
+          shasum -a 256 work/goland-${{ steps.meta.outputs.version }}-*.dmg \
             > work/SHA256.txt
 
       - name: Create GitHub Release
@@ -76,14 +86,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: goland-${{ steps.meta.outputs.version }}
-          name: GoLand ${{ steps.meta.outputs.version }} (Apple Silicon)
+          name: GoLand ${{ steps.meta.outputs.version }}
           body: |
             Automated release of GoLand ${{ steps.meta.outputs.version }}
 
-            Platform: macOS (Apple Silicon)
-            SHA256 checksum attached.
+            Platforms: macOS (Apple Silicon, Intel)
+            SHA256 checksums attached.
           files: |
             work/goland-${{ steps.meta.outputs.version }}-aarch64.dmg
+            work/goland-${{ steps.meta.outputs.version }}-x64.dmg
             work/SHA256.txt
 
   release-pycharm:
@@ -100,24 +111,29 @@ jobs:
             > meta.json
           
           VERSION=$(jq -r '.PCP[0].version' meta.json)
-          URL=$(jq -r '
-            .PCP[0].downloads.macM1.link //
-            .PCP[0].downloads.mac.link
-          ' meta.json)
+          URL_ARM=$(jq -r '.PCP[0].downloads.macM1.link' meta.json)
+          URL_INTEL=$(jq -r '.PCP[0].downloads.mac.link' meta.json)
           
           if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
             echo "Failed to detect version"
             exit 1
           fi
           
-          if [ -z "$URL" ] || [ "$URL" = "null" ]; then
-            echo "Failed to detect macOS download URL"
+          if [ -z "$URL_ARM" ] || [ "$URL_ARM" = "null" ]; then
+            echo "Failed to detect macOS Apple Silicon download URL"
+            cat meta.json
+            exit 1
+          fi
+
+          if [ -z "$URL_INTEL" ] || [ "$URL_INTEL" = "null" ]; then
+            echo "Failed to detect macOS Intel download URL"
             cat meta.json
             exit 1
           fi
           
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "url_arm=$URL_ARM" >> $GITHUB_OUTPUT
+          echo "url_intel=$URL_INTEL" >> $GITHUB_OUTPUT
 
 
 
@@ -131,19 +147,21 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Download PyCharm DMG
+      - name: Download PyCharm DMGs
         if: steps.check.outputs.exists == 'false'
         run: |
           mkdir -p work
           curl -L \
             -o work/pycharm-${{ steps.meta.outputs.version }}-aarch64.dmg \
-            "${{ steps.meta.outputs.url }}"
+            "${{ steps.meta.outputs.url_arm }}"
+          curl -L \
+            -o work/pycharm-${{ steps.meta.outputs.version }}-x64.dmg \
+            "${{ steps.meta.outputs.url_intel }}"
 
       - name: Calculate SHA256
         if: steps.check.outputs.exists == 'false'
         run: |
-          shasum -a 256 \
-            work/pycharm-${{ steps.meta.outputs.version }}-aarch64.dmg \
+          shasum -a 256 work/pycharm-${{ steps.meta.outputs.version }}-*.dmg \
             > work/SHA256.txt
 
       - name: Create GitHub Release
@@ -151,9 +169,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: pycharm-${{ steps.meta.outputs.version }}
-          name: PyCharm ${{ steps.meta.outputs.version }} (Apple Silicon)
+          name: PyCharm ${{ steps.meta.outputs.version }}
+          body: |
+            Automated release of PyCharm ${{ steps.meta.outputs.version }}
+
+            Platforms: macOS (Apple Silicon, Intel)
+            SHA256 checksums attached.
           files: |
             work/pycharm-${{ steps.meta.outputs.version }}-aarch64.dmg
+            work/pycharm-${{ steps.meta.outputs.version }}-x64.dmg
             work/SHA256.txt
 
   release-clion:
@@ -169,20 +193,22 @@ jobs:
             > meta.json
 
           VERSION=$(jq -r '.CL[0].version' meta.json)
-          URL=$(jq -r '
-            .CL[0].downloads.macM1.link //
-            .CL[0].downloads.mac.link
-          ' meta.json)
+          URL_ARM=$(jq -r '.CL[0].downloads.macM1.link' meta.json)
+          URL_INTEL=$(jq -r '.CL[0].downloads.mac.link' meta.json)
 
           test -n "$VERSION" && test "$VERSION" != "null" || {
             echo "Failed to detect version"; exit 1;
           }
-          test -n "$URL" && test "$URL" != "null" || {
-            echo "Failed to detect macOS download URL"; cat meta.json; exit 1;
+          test -n "$URL_ARM" && test "$URL_ARM" != "null" || {
+            echo "Failed to detect macOS Apple Silicon download URL"; cat meta.json; exit 1;
+          }
+          test -n "$URL_INTEL" && test "$URL_INTEL" != "null" || {
+            echo "Failed to detect macOS Intel download URL"; cat meta.json; exit 1;
           }
 
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "url_arm=$URL_ARM" >> "$GITHUB_OUTPUT"
+          echo "url_intel=$URL_INTEL" >> "$GITHUB_OUTPUT"
 
       - name: Check if release exists
         id: check
@@ -194,19 +220,21 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Download CLion DMG
+      - name: Download CLion DMGs
         if: steps.check.outputs.exists == 'false'
         run: |
           mkdir -p work
           curl -fL \
             -o work/clion-${{ steps.meta.outputs.version }}-aarch64.dmg \
-            "${{ steps.meta.outputs.url }}"
+            "${{ steps.meta.outputs.url_arm }}"
+          curl -fL \
+            -o work/clion-${{ steps.meta.outputs.version }}-x64.dmg \
+            "${{ steps.meta.outputs.url_intel }}"
 
       - name: Calculate SHA256
         if: steps.check.outputs.exists == 'false'
         run: |
-          shasum -a 256 \
-            work/clion-${{ steps.meta.outputs.version }}-aarch64.dmg \
+          shasum -a 256 work/clion-${{ steps.meta.outputs.version }}-*.dmg \
             > work/SHA256.txt
 
       - name: Create GitHub Release
@@ -214,12 +242,13 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: clion-${{ steps.meta.outputs.version }}
-          name: CLion ${{ steps.meta.outputs.version }} (Apple Silicon)
+          name: CLion ${{ steps.meta.outputs.version }}
           body: |
             Automated release of CLion ${{ steps.meta.outputs.version }}
 
-            Platform: macOS (Apple Silicon)
-            SHA256 checksum attached.
+            Platforms: macOS (Apple Silicon, Intel)
+            SHA256 checksums attached.
           files: |
             work/clion-${{ steps.meta.outputs.version }}-aarch64.dmg
+            work/clion-${{ steps.meta.outputs.version }}-x64.dmg
             work/SHA256.txt
