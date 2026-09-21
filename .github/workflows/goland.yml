@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: "0 3 * * *"   # раз в сутки (03:00 UTC)
   workflow_dispatch:
+    inputs:
+      force_update:
+        description: Update an existing release with the latest assets
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -60,12 +66,12 @@ jobs:
           fi
 
       - name: Stop if release already exists
-        if: steps.check.outputs.exists == 'true'
+        if: steps.check.outputs.exists == 'true' && github.event.inputs.force_update != 'true'
         run: |
           echo "Release already exists, skipping."
 
       - name: Download GoLand DMGs
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.exists == 'false' || github.event.inputs.force_update == 'true'
         run: |
           mkdir -p work
           curl -L \
@@ -76,13 +82,13 @@ jobs:
             "${{ steps.meta.outputs.url_intel }}"
 
       - name: Calculate SHA256
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.exists == 'false' || github.event.inputs.force_update == 'true'
         run: |
           shasum -a 256 work/goland-${{ steps.meta.outputs.version }}-*.dmg \
             > work/SHA256.txt
 
       - name: Create GitHub Release
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.exists == 'false' || github.event.inputs.force_update == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: goland-${{ steps.meta.outputs.version }}
@@ -148,7 +154,7 @@ jobs:
           fi
 
       - name: Download PyCharm DMGs
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.exists == 'false' || github.event.inputs.force_update == 'true'
         run: |
           mkdir -p work
           curl -L \
@@ -159,13 +165,13 @@ jobs:
             "${{ steps.meta.outputs.url_intel }}"
 
       - name: Calculate SHA256
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.exists == 'false' || github.event.inputs.force_update == 'true'
         run: |
           shasum -a 256 work/pycharm-${{ steps.meta.outputs.version }}-*.dmg \
             > work/SHA256.txt
 
       - name: Create GitHub Release
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.exists == 'false' || github.event.inputs.force_update == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: pycharm-${{ steps.meta.outputs.version }}
@@ -221,7 +227,7 @@ jobs:
           fi
 
       - name: Download CLion DMGs
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.exists == 'false' || github.event.inputs.force_update == 'true'
         run: |
           mkdir -p work
           curl -fL \
@@ -232,13 +238,13 @@ jobs:
             "${{ steps.meta.outputs.url_intel }}"
 
       - name: Calculate SHA256
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.exists == 'false' || github.event.inputs.force_update == 'true'
         run: |
           shasum -a 256 work/clion-${{ steps.meta.outputs.version }}-*.dmg \
             > work/SHA256.txt
 
       - name: Create GitHub Release
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.exists == 'false' || github.event.inputs.force_update == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: clion-${{ steps.meta.outputs.version }}
